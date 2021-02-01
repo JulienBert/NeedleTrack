@@ -18,20 +18,28 @@ Config.set('graphics', 'resizable', '0')
 Config.set('graphics', 'width', '1920')
 Config.set('graphics', 'height', '1080')
 
-import time
+import time, json, sys
 
 #"#Tools,ToolInfo,Frame#,PortHandle,Face#,TransformStatus,Q0,Qx,Qy,Qz,Tx,Ty,Tz,Error,Markers,State,Tx,Ty,Tz"
 # 21.305      -3.568      -2.408     169.623       3.359    -129.423
 
 class Tracker(BoxLayout):
     
+    try:
+        afile = open('Settings.json', 'r')
+        cfg = json.load(afile)
+        afile.close()
+    except:
+        print('Impossible to load Settings.json file!')
+        sys.exit(0)
+
     origin_needle = [0, 0, 0]
     needle_pos = [0, 0, 0]     # x y z
     needle_rot = [0, 0, 0]   # yaw pitch roll in degree
     target_pos = [0, 0, 0]  # x y z
 
-    data_prob_scaling = 12.0 # For small movement within the prostate with the needle
-    scaling = 0.5 # View
+    data_prob_scaling = cfg['probe']['data_prob_scaling'] # For small movement within the prostate with the needle
+    scaling = cfg['view']['scaling'] # View
 
     image_width = 1920*scaling
     image_height = 1661*scaling
@@ -42,17 +50,17 @@ class Tracker(BoxLayout):
     offset_sagital_view = (465*scaling, 200*scaling)
     size_view = (1920*scaling, 1661*scaling)
 
-    needle_size = 7
-    needle_line_width = 1
+    needle_size = cfg['view']['needle_size']
+    needle_line_width = cfg['view']['needle_line_width']
 
-    track_file_pathname = "..\\Aurora\\Release\\trackfile.txt"
+    track_file_pathname = cfg['probe']['track_file_pathname']
     track_old_ID = -1
     track_enable = False
 
-    target_size = 14
+    target_size = cfg['view']['target_size']
     target_on = False
 
-    refresh_time = 0.01     
+    refresh_time = cfg['probe']['refresh_time']     
 
     # Graphics
     CoronalAxisH = ListProperty([0, origin_coronal_view[1], size_view[0], origin_coronal_view[1]])
@@ -323,6 +331,49 @@ class Tracker(BoxLayout):
         else:
             self.target_on = False
             self.TargetOpacity = 0.0
+
+    def cmd_plan(self):
+
+        # Starting point Coronal view
+        CoX0 = self.cfg['plan']['CoX0']
+        CoY0 = self.cfg['plan']['CoY0']
+
+        # Starting point Sagital view
+        SaX0 = self.cfg['plan']['SaX0']
+        SaY0 = self.cfg['plan']['SaY0']
+        
+        # Seed dimension
+        Sw = self.cfg['plan']['Sw']
+        Sh = self.cfg['plan']['Sh']
+        # Padding
+        Px = self.cfg['plan']['Px']
+        Py = self.cfg['plan']['Py']
+
+        # Coronal view
+        #          Needle 1                Needle 2
+        CoPlanX = [CoX0, CoX0, CoX0, CoX0, CoX0+Px, CoX0+Px, CoX0+Px, CoX0+Px]
+        #           Needle 1                            Needle 2
+        CoPlanY = [CoY0, CoY0+Py, CoY0+3*Py, CoY0+4*Py, CoY0, CoY0+Py, CoY0+2*Py, CoY0+3*Py]
+
+        # Sagital view
+        #       Needles
+        SaPlanX = [SaX0, SaX0+Py, SaX0+2*Py, SaX0+3*Py, SaX0+4*Py]
+        #       Needles
+        SaPlanY = [SaY0, SaY0, SaY0, SaY0, SaY0]
+
+        with self.canvas:
+            Color(1, 0, 0)
+            # Coronal view
+            for i in range(len(CoPlanX)):
+                px = CoPlanX[i]
+                py = CoPlanY[i]
+                Rectangle(pos=(px, py), size=(Sw, Sh))
+
+            # Sagital view
+            for i in range(len(SaPlanX)):
+                px = SaPlanX[i]
+                py = SaPlanY[i]
+                Rectangle(pos=(px, py), size=(Sh, Sw))
 
 
 class NeedleTrackApp(App):

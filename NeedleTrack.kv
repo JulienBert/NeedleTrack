@@ -9,7 +9,7 @@
             size_hint_y: 0.1
 
             Label:
-                text: 'Needle Tracker'
+                text: 'BrachyBot Tracker'
                 valign: 'middle'
                 font_size: 64
 
@@ -158,6 +158,13 @@
                 disabled: True
                 on_press: root.cmd_target()
 
+            Button:
+                id: bt_plan
+                text: 'Load plan'
+                font_size: 40
+                disabled: True
+                on_press: root.cmd_plan()
+            
             Label:
                 id: lbl_error
                 text: 'error: xx mm'

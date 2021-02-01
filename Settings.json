@@ -1,0 +1,32 @@
+{
+    "view" :
+    {
+        "scaling" : 0.5,
+        "needle_size" : 7,
+        "needle_line_width" : 1,
+        "target_size" : 14
+    },
+       
+
+    "probe" :
+    {
+        "data_prob_scaling" : 12.0,
+        "track_file_pathname" : "..\\Aurora\\Release\\trackfile.txt",
+        "refresh_time" : 0.01  
+    },
+
+    "plan" :
+    {
+        "CoX0" : 550,
+        "CoY0" : 450,
+
+        "SaX0" : 1200,
+        "SaY0" : 650,
+        
+        "Sw" : 7,
+        "Sh" : 30,
+        
+        "Px" : 70,
+        "Py" : 100
+    }
+}
