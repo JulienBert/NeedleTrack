@@ -1,0 +1,6 @@
+/.vscode
+/build
+/dist
+/kivy_venv
+/NeedleTrack.spec
+/__pycache__

@@ -1,0 +1,164 @@
+#:kivy 1.11.1
+
+<Tracker>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+
+            Label:
+                text: 'Needle Tracker'
+                valign: 'middle'
+                font_size: 64
+
+            Image:
+                size_hint_x: 0.06
+                size: 64, 64
+                source: 'data/latim.png'
+            
+
+        BoxLayout:
+            orientation: 'horizontal'
+            
+            Image:
+                id: coronal_view
+                source: 'data/coronalview.png'
+                allow_stretch: True
+                keep_ratio: True
+                canvas.after:
+                    # Axis
+                    Color:
+                        rgba: 0, 0, 0, 0.5
+                    Line:
+                        width: 4
+                        points: root.CoronalAxisH
+                    Line:
+                        width: 4
+                        points: root.CoronalAxisV
+                    # Target
+                    Color:
+                        rgba: 0, 1, 0, root.TargetOpacity
+                    Line:
+                        width: 2
+                        circle: root.CoronalTargetCircle
+                    Line:
+                        width: 2
+                        points: root.CoronalTargetLine1
+                    Line:
+                        width: 2
+                        points: root.CoronalTargetLine2
+                    # Needle path
+                    Color:
+                        rgba: 1, 1, 0, root.NeedleOpacity
+                    Line:
+                        width: root.needle_line_width
+                        points: root.CoronalNeedlePath
+                    # Needle pos
+                    Color:
+                        rgba: 0, 0, 1, root.NeedleOpacity
+                    Line:
+                        width: root.needle_size
+                        points: root.CoronalNeedlePos
+       
+            Image:
+                id: sagital_view
+                source: 'data/sagitalview.png'
+                allow_stretch: True
+                keep_ratio: True
+                canvas:
+                    # Axis
+                    Color:
+                        rgba: 0, 0, 0, 0.5
+                    Line:
+                        width: 4
+                        points: root.SagitalAxisH
+                    Line:
+                        width: 4
+                        points: root.SagitalAxisV
+                canvas.after:
+                    # Target
+                    Color:
+                        rgba: 0, 1, 0, root.TargetOpacity
+                    Line:
+                        width: 2
+                        circle: root.SagitalTargetCircle
+                    Line:
+                        width: 2
+                        points: root.SagitalTargetLine1
+                    Line:
+                        width: 2
+                        points: root.SagitalTargetLine2
+                    # Needle path
+                    Color:
+                        rgba: 1, 1, 0, root.NeedleOpacity
+                    Line:
+                        width: root.needle_line_width
+                        points: root.SagitalNeedlePath
+                    # Needle pos
+                    Color:
+                        rgba: 0, 0, 1, root.NeedleOpacity
+                    Line:
+                        width: root.needle_size
+                        points: root.SagitalNeedlePos
+
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+
+            Label:
+                text: 'Coronal view'
+                font_size: 50
+
+            Label:
+                text: 'Sagital view'
+                font_size: 50
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.04
+
+            Label:
+                id: lbl_track
+                text: 'Pos x y z  Rot y p r'
+                font_size: 30
+                markup: True
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.06
+
+            Button:
+                id: bt_start
+                text: 'Start'
+                font_size: 40
+                disabled: False
+                on_press: root.cmd_start()
+
+            Button:
+                id: bt_stop
+                text: 'Stop'
+                font_size: 40
+                disabled: True
+                on_press: root.cmd_stop()
+
+            Button:
+                id: bt_calibrate
+                text: 'Calibrate'
+                font_size: 40
+                disabled: True
+                on_press: root.cmd_calibrate()
+
+            Button:
+                id: bt_target
+                text: 'Set target'
+                font_size: 40
+                disabled: True
+                on_press: root.cmd_target()
+
+            Label:
+                id: lbl_error
+                text: 'error: xx mm'
+                font_size: 40
