@@ -17,8 +17,8 @@
 
     "cobot" :
     {
-        "COMID" : "COM2",
-        "baudrate" : 115200,
+        "COMID" : "COM4",
+        "baudrate" : 19200,
         "model_iter": 20,
         "model_err": 1e-05
     },

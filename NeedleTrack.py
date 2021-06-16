@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.7
 
 import kivy
-kivy.require('1.11.0')
+kivy.require('1.11.1')
 
 from kivy.app import App
 from kivy.uix.widget import Widget
@@ -238,15 +238,19 @@ class Tracker(BoxLayout):
 
         return(v,i,err)
 
-    def cobot_init_com(self):
-        self.ser = serial.Serial()
-        self.ser.baudrate = self.cfg['cobot']['baudrate']
-        self.ser.port = self.cfg['cobot']['COMID']
+    # def cobot_init_com(self):
+    #     with serial.Serial(self.cfg['cobot']['COMID'], self.cfg['cobot']['baudrate'], timeout = 1) as ser:
 
-        self.ser.open()
+        
+    #     self.ser = serial.Serial()
+    #     self.ser.baudrate = self.cfg['cobot']['baudrate']
+    #     self.ser.port = self.cfg['cobot']['COMID']
+    #     self.ser.timeout = 1
 
-    def cobot_exit_com(self):
-        self.ser.close()
+    #     self.ser.open()
+
+    # def cobot_exit_com(self):
+    #     self.ser.close()
 
     # Read data from cobot
     def get_data_cobot(self):
@@ -262,14 +266,19 @@ class Tracker(BoxLayout):
         }
          
         # Read joint angles 
-        if self.ser.is_open() and self.ser.in_waiting:
-            packet = self.ser.readline()
-            # Ex. of packet
-            # packet = b'12.3;45.6;78.9;1.2;34.5;67.8\n'
-            raw = packet.decode('utf-8', 'backslashreplace')
-            raw = raw.strip().split(';')
-            angles = np.array(raw, 'float32')
-            angles *= (pi / 180.0)  # in rad
+        # if self.ser.is_open and self.ser.in_waiting:
+
+        with serial.Serial(self.cfg['cobot']['COMID'], self.cfg['cobot']['baudrate'], timeout = 1) as ser:
+            line = ser.readline()
+            ser.close()
+        print(line)
+        # Ex. of packet
+        # packet = b'12.3;45.6;78.9;1.2;34.5;67.8\n'
+        raw = line.decode('utf-8', 'backslashreplace')
+        raw = raw.strip().split(';')
+        print(raw)
+        angles = np.array(raw, 'float32')
+        angles *= (pi / 180.0)  # in rad
 
         # TODO a revoir
         #if angles[0] == "" or angles[2] == "Missing":
@@ -292,19 +301,19 @@ class Tracker(BoxLayout):
             
         return Probe
 
-    def get_data_cobot_DEBUG(self):
-        Probe = {
-            'id': 1,
-            'flag': 'Enable',
-            'x': 0,
-            'y': 0,
-            'z': 0,
-            'yaw': 0,
-            'pitch': 0,
-            'roll': 0
-        }
+    # def get_data_cobot_DEBUG(self):
+    #     Probe = {
+    #         'id': 1,
+    #         'flag': 'Enable',
+    #         'x': 0,
+    #         'y': 0,
+    #         'z': 0,
+    #         'yaw': 0,
+    #         'pitch': 0,
+    #         'roll': 0
+    #     }
 
-        return Probe
+    #     return Probe
 
     ########## EM TRACKER ##############################
 
@@ -370,6 +379,25 @@ class Tracker(BoxLayout):
 
         return gbl_pos    
 
+    # The first screen is at the pos 0
+    def convert_to_coronal_frame_cobot(self, pos):
+        gbl_pos = [0, 0]
+
+        gbl_pos[0] = (pos[0]*self.data_prob_scaling) - (self.cobot_origin_needle[0]*self.data_prob_scaling) + self.origin_coronal_view[0]
+        gbl_pos[1] = (pos[2]*self.data_prob_scaling) - (self.cobot_origin_needle[2]*self.data_prob_scaling) + self.origin_coronal_view[1]
+
+        return gbl_pos
+        
+    # The second screen is at the pos width
+    def convert_to_sagital_frame_cobot(self, pos):
+        gbl_pos = [0, 0]
+
+        #gbl_pos[0] = self.origin_sagital_view[0] - pos[2] - self.origin_needle[2]
+        gbl_pos[0] = (self.cobot_origin_needle[2]*self.data_prob_scaling) + self.origin_sagital_view[0] - (pos[2]*self.data_prob_scaling)
+        gbl_pos[1] = (pos[1]*self.data_prob_scaling) - (self.cobot_origin_needle[1]*self.data_prob_scaling) + self.origin_sagital_view[1]
+
+        return gbl_pos    
+
     # Quaternion to Euler
     def convert_quaternion_to_euler(self, q0, q1, q2, q3):
         u = 2*(q0*q1 + q2*q3)
@@ -423,7 +451,7 @@ class Tracker(BoxLayout):
 
     # Cobot - Draw needle and needle path
     def update_needle_cobot(self):
-        px, py = self.convert_to_coronal_frame(self.cobot_needle_pos)
+        px, py = self.convert_to_coronal_frame_cobot(self.cobot_needle_pos)
         tan_yaw = tan(pi/180*self.cobot_needle_rot[0])
         dy1 = (py - self.offset_coronal_view[0]) * tan_yaw
         dy2 = (self.size_view[1] - py + self.offset_coronal_view[1]) * tan_yaw
@@ -440,7 +468,7 @@ class Tracker(BoxLayout):
         self.cobot_CoronalNeedlePos[2] = px
         self.cobot_CoronalNeedlePos[3] = py
 
-        px, py = self.convert_to_sagital_frame(self.cobot_needle_pos)
+        px, py = self.convert_to_sagital_frame_cobot(self.cobot_needle_pos)
         tan_pitch = tan(pi/180*self.cobot_needle_rot[1])
         dy1 = (px-self.size_view[0]) * tan_pitch
         dy2 = (2*self.size_view[0] - px) * tan_pitch
@@ -498,10 +526,10 @@ class Tracker(BoxLayout):
         self.ids['lbl_error'].text = 'error: %5.1f mm' % DistErr
 
         # If cobot
-        if self.track_enable_cobot is True:
-            dx = self.cobot_needle_pos[0]-self.target_pos[0]
-            dy = self.cobot_needle_pos[1]-self.target_pos[1]
-            dz = self.cobot_needle_pos[2]-self.target_pos[2]
+        if self.cobot_track_enable is True:
+            dx = self.cobot_needle_pos[0]-self.target_pos[0]+self.origin_needle[0]
+            dy = self.cobot_needle_pos[1]-self.target_pos[1]+self.origin_needle[1]
+            dz = self.cobot_needle_pos[2]-self.target_pos[2]+self.origin_needle[2]
             DistErr = (dx*dx + dy*dy + dz*dz)**(0.5)
             self.ids['lbl_error_cobot'].text = 'error: %5.1f mm' % DistErr
 
@@ -544,8 +572,8 @@ class Tracker(BoxLayout):
 
         # Cobot tracker
         if self.cobot_track_enable is True:
-            # Read the cobot DEBUG
-            data = self.get_data_cobot_DEBUG()
+            # Read the cobot
+            data = self.get_data_cobot()
 
             # Assign new values
             self.cobot_needle_pos[0] = data['x']
@@ -587,8 +615,8 @@ class Tracker(BoxLayout):
 
         self.cobot_track_enable = True
 
-        # DEBUG Init com before tracking
-        #self.cobot_init_com()
+        # Init com before tracking
+        # self.cobot_init_com()
 
         # Calibrate needle before tracking
         self.cmd_calibrate_cobot()
@@ -615,8 +643,7 @@ class Tracker(BoxLayout):
         self.track_enable_cobot = False
         self.cobot_NeedleOpacity = 0.0
 
-        # DEBUG
-        #self.cobot_exit_com()
+        self.cobot_exit_com()
 
     def cmd_calibrate(self):
         # Read the probe
@@ -632,9 +659,7 @@ class Tracker(BoxLayout):
 
     def cmd_calibrate_cobot(self):
         # Read the cobot
-        #data = self.get_data_cobot()
-        # DEBUG
-        data = self.get_data_cobot_DEBUG()
+        data = self.get_data_cobot()
 
         # check if the probe is not lost
         if data['flag'] == 'lost':
