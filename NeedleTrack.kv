@@ -61,6 +61,18 @@
                     Line:
                         width: root.needle_size
                         points: root.CoronalNeedlePos
+                    # Cobot Needle path
+                    Color:
+                        rgba: 1, 0, 0, root.cobot_NeedleOpacity
+                    Line:
+                        width: root.needle_line_width
+                        points: root.cobot_CoronalNeedlePath
+                    # Cobot Needle pos
+                    Color:
+                        rgba: 0, 1, 0, root.cobot_NeedleOpacity
+                    Line:
+                        width: root.needle_size
+                        points: root.cobot_CoronalNeedlePos
        
             Image:
                 id: sagital_view
@@ -102,6 +114,18 @@
                     Line:
                         width: root.needle_size
                         points: root.SagitalNeedlePos
+                    # Cobot Needle path
+                    Color:
+                        rgba: 1, 0, 0, root.cobot_NeedleOpacity
+                    Line:
+                        width: root.needle_line_width
+                        points: root.cobot_SagitalNeedlePath
+                    # Cobot Needle pos
+                    Color:
+                        rgba: 0, 1, 0, root.cobot_NeedleOpacity
+                    Line:
+                        width: root.needle_size
+                        points: root.cobot_SagitalNeedlePos
 
 
         BoxLayout:
@@ -120,52 +144,107 @@
             orientation: 'horizontal'
             size_hint_y: 0.04
 
-            Label:
-                id: lbl_track
-                text: 'Pos x y z  Rot y p r'
-                font_size: 30
-                markup: True
+           
 
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: 0.06
 
+            Label:
+                text: 'EM tracker'
+                font_size: 30
+
             Button:
                 id: bt_start
                 text: 'Start'
-                font_size: 40
+                font_size: 30
                 disabled: False
                 on_press: root.cmd_start()
 
             Button:
                 id: bt_stop
                 text: 'Stop'
-                font_size: 40
+                font_size: 30
                 disabled: True
                 on_press: root.cmd_stop()
 
             Button:
                 id: bt_calibrate
-                text: 'Calibrate'
-                font_size: 40
+                text: 'Set origin'
+                font_size: 30
                 disabled: True
                 on_press: root.cmd_calibrate()
 
-            Button:
-                id: bt_target
-                text: 'Set target'
-                font_size: 40
-                disabled: True
-                on_press: root.cmd_target()
-
-            Button:
-                id: bt_plan
-                text: 'Load plan'
-                font_size: 40
-                disabled: True
-                on_press: root.cmd_plan()
             
+
+            # Button:
+            #     id: bt_plan
+            #     text: 'Load plan'
+            #     font_size: 30
+            #     disabled: True
+            #     on_press: root.cmd_plan()
+            
+            Label:
+                id: lbl_track
+                text: 'Pos x y z  Rot y p r'
+                font_size: 12
+                markup: True
+
             Label:
                 id: lbl_error
                 text: 'error: xx mm'
-                font_size: 40
+                font_size: 30
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.06
+
+            Label:
+                text: 'Cobot'
+                font_size: 30
+
+            Button:
+                id: bt_start_cobot
+                text: 'Start'
+                font_size: 30
+                disabled: False
+                on_press: root.cmd_start_cobot()
+
+            Button:
+                id: bt_stop_cobot
+                text: 'Stop'
+                font_size: 30
+                disabled: True
+                on_press: root.cmd_stop_cobot()
+
+            Button:
+                id: bt_calibrate_cobot
+                text: 'Set tracker org'
+                font_size: 30
+                disabled: True
+                on_press: root.cmd_calibrate_cobot()
+
+            Label:
+                id: lbl_track_cobot
+                text: 'Pos x y z  Rot y p r'
+                font_size: 12
+                markup: True
+
+
+            Label:
+                id: lbl_error_cobot
+                text: 'error: xx mm'
+                font_size: 30
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.06
+            size_hint_x: 0.17
+            Button:
+                id: bt_target
+                text: 'Set target'
+                font_size: 30
+                disabled: True
+                on_press: root.cmd_target()
+
+            

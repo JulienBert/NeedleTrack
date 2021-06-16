@@ -15,6 +15,14 @@
         "refresh_time" : 0.01  
     },
 
+    "cobot" :
+    {
+        "COMID" : "COM2",
+        "baudrate" : 115200,
+        "model_iter": 20,
+        "model_err": 1e-05
+    },
+
     "plan" :
     {
         "CoX0" : 550,
